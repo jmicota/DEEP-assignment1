@@ -14,7 +14,7 @@ KEYS_3 = ['company', 'year', 'day', 'quarter']
 
 def int_to_bool_tuple(num):
     bin_string = format(num, '03b')
-    return tuple([x == '1' for x in bin_string[::-1]])
+    return tuple(reversed([x == '1' for x in bin_string[::-1]]))
 
 
 def standardize_data(data):
