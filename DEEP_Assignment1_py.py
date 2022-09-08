@@ -59,47 +59,46 @@ simulator.read_market_analysis(market_analysis)
 simulator.read_market_segments(market_segments)
 simulator.read_info(info)
 
-train_dl, test_dl = spp.process_training_data(market_segments, market_analysis, 
-                                              info, stock_prices, BATCH_SIZE)
+train_dl, test_dl = spp.create_training_dataloaders(market_segments, market_analysis, info, stock_prices, BATCH_SIZE)
 
 """# Build the Neural Network Model"""
 
+
 # Create Neural Network Model (ANN)
 class StocksModel(nn.Module):
-  
-  def __init__(self):
-    super().__init__()
-    # self.fc1 = nn.Linear(len(X[0])*len(X[0][0]), NN_WIDTH)  #)*len(train_dl.dataset[0][0]
-    # print("SIZEEEEEEEEEEEEEEEEEEEEE:",train_dl.dataset[0])
-    self.fc1 = nn.Linear(33, NN_WIDTH)
-    self.av1 = nn.ReLU()
-    self.fc2 = nn.Linear(NN_WIDTH, NN_WIDTH)
-    self.av2 = nn.ReLU()
-    self.fc3 = nn.Linear(NN_WIDTH, NN_WIDTH)
-    self.av3 = nn.ReLU()
-    self.fc4 = nn.Linear(NN_WIDTH, NN_WIDTH)
-    self.av4 = nn.ReLU()
-    self.fc5 = nn.Linear(NN_WIDTH, NN_WIDTH)
-    self.av5 = nn.ReLU()
-    self.fc6 = nn.Linear(NN_WIDTH, 8)
-    self.avout = nn.LogSoftmax(dim=-1)
 
-    return None
+    def __init__(self):
+        super().__init__()
+        # self.fc1 = nn.Linear(len(X[0])*len(X[0][0]), NN_WIDTH)  #)*len(train_dl.dataset[0][0]
+        self.fc1 = nn.Linear(33, NN_WIDTH)
+        self.av1 = nn.ReLU()
+        self.fc2 = nn.Linear(NN_WIDTH, NN_WIDTH)
+        self.av2 = nn.ReLU()
+        self.fc3 = nn.Linear(NN_WIDTH, NN_WIDTH)
+        self.av3 = nn.ReLU()
+        self.fc4 = nn.Linear(NN_WIDTH, NN_WIDTH)
+        self.av4 = nn.ReLU()
+        self.fc5 = nn.Linear(NN_WIDTH, NN_WIDTH)
+        self.av5 = nn.ReLU()
+        self.fc6 = nn.Linear(NN_WIDTH, 8)
+        self.avout = nn.LogSoftmax(dim=-1)
+        return None
 
-  def forward(self, x):
-    x = self.fc1(x)
-    x = self.av1(x)
-    x = self.fc2(x)
-    x = self.av2(x)
-    x = self.fc3(x)
-    x = self.av3(x)
-    x = self.fc4(x)
-    x = self.av4(x)
-    x = self.fc5(x)
-    x = self.av5(x)
-    x = self.fc6(x)
-    x = self.avout(x)      # Alternate way: nn.functional.log_softmax(x)
-    return x
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.av1(x)
+        x = self.fc2(x)
+        x = self.av2(x)
+        x = self.fc3(x)
+        x = self.av3(x)
+        x = self.fc4(x)
+        x = self.av4(x)
+        x = self.fc5(x)
+        x = self.av5(x)
+        x = self.fc6(x)
+        x = self.avout(x)  # Alternate way: nn.functional.log_softmax(x)
+        return x
+
 
 stock_market_predictor_0000 = StocksModel()
 print(stock_market_predictor_0000)
@@ -109,36 +108,33 @@ print(stock_market_predictor_0000)
 optimizer = torch.optim.Adam(stock_market_predictor_0000.parameters(), lr=LR)
 
 for epochs in range(N_EPOCHS):
-  for data in train_dl:
-    X, y = data
-    # TODO: why first element of X elements is 1 always xd
-    # print(X, y)
-    optimizer.zero_grad() # clear gradient information.
-    output = stock_market_predictor_0000(X.view(-1, len(X[0])*len(X[0][0])))
-    loss = nn.functional.nll_loss(output, y)
-    loss.backward() # do pack-propagation step
-    optimizer.step() # update weights
+    for data in train_dl:
+        X, y = data
+        optimizer.zero_grad()  # clear gradient information.
+        output = stock_market_predictor_0000(X.view(-1, len(X[0]) * len(X[0][0])))
+        loss = nn.functional.nll_loss(output, y)
+        loss.backward()  # do pack-propagation step
+        optimizer.step()  # update weights
 
 """# Evaluate"""
 
 total = 0
 correct = 0
-with torch.no_grad():   # No need for keepnig track of necessary changes to the gradient.
-  for data in test_dl:
-    X, y = data
-    output = stock_market_predictor_0000(X.view(-1, len(X[0])*len(X[0][0])))
-    for idx, val in enumerate(output):
-      if torch.argmax(val) == y[idx]:
-        correct += 1
-      total += 1
-  print('Accuracy:', round(correct/total, 3))
+with torch.no_grad():  # No need for keepnig track of necessary changes to the gradient.
+    for data in test_dl:
+        X, y = data
+        output = stock_market_predictor_0000(X.view(-1, len(X[0]) * len(X[0][0])))
+        for idx, val in enumerate(output):
+            if torch.argmax(val) == y[idx]:
+                correct += 1
+            total += 1
+    print('Accuracy:', round(correct / total, 3))
 
 """# Check Predictor compatibility"""
 
 import predictor
 
-predictor_object = predictor.Predictor('stocks_predictor', 
-                                       stock_market_predictor_0000)
+predictor_object = predictor.Predictor('stocks_predictor', stock_market_predictor_0000)
 simulator.simulate(2017, 1, predictor_object)
 
 # predictor_object.predict(market_segments, market_analysis, info, [1,1,1,1])
