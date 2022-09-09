@@ -69,8 +69,8 @@ class StocksModel(nn.Module):
 
     def __init__(self):
         super().__init__()
-        # self.fc1 = nn.Linear(len(X[0])*len(X[0][0]), NN_WIDTH)  #)*len(train_dl.dataset[0][0]
-        self.fc1 = nn.Linear(33, NN_WIDTH)
+        input_size = len(train_dl.dataset[0][0]) * len(train_dl.dataset[0][0][0])
+        self.fc1 = nn.Linear(input_size, NN_WIDTH)
         self.av1 = nn.ReLU()
         # self.fc2 = nn.Linear(NN_WIDTH, NN_WIDTH)
         # self.av2 = nn.ReLU()
