@@ -42,7 +42,7 @@ class Predictor:
         :return: A Python 3-tuple with your predictions: go-up (True), not (False) [company0, company1, company2]
         """
         model = self.get_model()
-        data = stock_preprocessing.prepare_prediction_data(info_company, info_quarter, info_daily)
+        data = stock_preprocessing.prepare_prediction_data(info_company, info_quarter, info_daily, current_stock_price)
         y = list()
 
         for X in data:
