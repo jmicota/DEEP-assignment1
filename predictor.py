@@ -1,7 +1,9 @@
 import stock_preprocessing
+import torch
+
 
 class Predictor:
-    def __init__(self, name, model, args = None):
+    def __init__(self, name, model, args=None):
         """
         Constructor   
         :param name:  A name given to your predictor
@@ -40,13 +42,12 @@ class Predictor:
         :return: A Python 3-tuple with your predictions: go-up (True), not (False) [company0, company1, company2]
         """
         model = self.get_model()
-        # TODO: why 'data' is has only 1 test case??
-        data = stock_preprocessing.prediction_dataloaders(info_company, info_quarter, info_daily)
-        # print(data)
-        for X in data:
-            # print("CHUJUUUUUUUUUU:", X)
-            # print(X.view(-1, len(X)*len(X[0])))
-            y = model(X.view(-1, len(X)*len(X[0])))
-            # print("PREDICTOR RESULT: ", y)
+        data = stock_preprocessing.prepare_prediction_data(info_company, info_quarter, info_daily)
+        y = list()
 
-        return True, True, True
+        for X in data:
+            output = model(X.view(-1, len(X) * len(X[0])))
+            for idx, val in enumerate(output):
+                y = torch.argmax(val)
+
+        return stock_preprocessing.int_to_bool_tuple(y)
