@@ -41,6 +41,7 @@ import pandas as pd
 
 import simulator
 import stock_preprocessing as spp
+import model
 
 """# Preprocess/ prepare data
 
@@ -60,47 +61,11 @@ simulator.read_market_segments(market_segments)
 simulator.read_info(info)
 
 train_dl, test_dl = spp.create_training_dataloaders(market_segments, market_analysis, info, stock_prices, BATCH_SIZE)
+input_layer_size = len(train_dl.dataset[0][0]) * len(train_dl.dataset[0][0][0])
 
 """# Build the Neural Network Model"""
 
-
-# Create Neural Network Model (ANN)
-class StocksModel(nn.Module):
-
-    def __init__(self):
-        super().__init__()
-        input_size = len(train_dl.dataset[0][0]) * len(train_dl.dataset[0][0][0])
-        self.fc1 = nn.Linear(input_size, NN_WIDTH)
-        self.av1 = nn.ReLU()
-        # self.fc2 = nn.Linear(NN_WIDTH, NN_WIDTH)
-        # self.av2 = nn.ReLU()
-        # self.fc3 = nn.Linear(NN_WIDTH, NN_WIDTH)
-        # self.av3 = nn.ReLU()
-        # self.fc4 = nn.Linear(NN_WIDTH, NN_WIDTH)
-        # self.av4 = nn.ReLU()
-        self.fc5 = nn.Linear(NN_WIDTH, NN_WIDTH)
-        self.av5 = nn.ReLU()
-        self.fc6 = nn.Linear(NN_WIDTH, 8)
-        self.avout = nn.LogSoftmax(dim=-1)
-        return None
-
-    def forward(self, x):
-        x = self.fc1(x)
-        x = self.av1(x)
-        # x = self.fc2(x)
-        # x = self.av2(x)
-        # x = self.fc3(x)
-        # x = self.av3(x)
-        # x = self.fc4(x)
-        # x = self.av4(x)
-        x = self.fc5(x)
-        x = self.av5(x)
-        x = self.fc6(x)
-        x = self.avout(x)  # Alternate way: nn.functional.log_softmax(x)
-        return x
-
-
-stock_market_predictor_0000 = StocksModel()
+stock_market_predictor_0000 = model.StocksModel(input_layer_size)
 print(stock_market_predictor_0000)
 
 """# Train Model"""
