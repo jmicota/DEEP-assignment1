@@ -1,6 +1,5 @@
 import operator
 
-
 def read_stock_prices(records):
     with open('data/stock_prices.txt') as f:
         for line in f:
@@ -97,6 +96,7 @@ def simulate(start_year, start_day, pd):
                 for c in range(num_companies):
                     increased.append(current_stock_prices[c] > previous_stock_prices[c])
                 y = pd.predict(market_segments, quarterly, daily, current_stock_prices)
+                print(market_segments, quarterly, daily, current_stock_prices)
                 print("Predictions (year, day):", daily[0][1], daily[0][2], y, "Target:", increased)
                 for c in range(num_companies):
                     if y[c] == increased[c]:
@@ -104,4 +104,3 @@ def simulate(start_year, start_day, pd):
                     total += 1
         previous_stock_prices = current_stock_prices
     print("Accuracy(%) = ", 100*correct / total)
-
